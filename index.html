@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RoboAssist</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- QR Scanner Screen -->
+        <div id="scanner-screen" class="screen active">
+            <h1><i class="fas fa-robot"></i> RoboAssist</h1>
+            <h2>Scan QR Code to Connect</h2>
+            <div id="reader">
+                <video id="video" style="width:100%;height:auto;" autoplay playsinline></video>
+                <canvas id="canvas" style="display:none;"></canvas>
+            </div>
+            <div id="qr-reader-results">Position QR code in the frame</div>
+            <button class="btn btn-secondary" onclick="manualConnect()">
+                <i class="fas fa-keyboard"></i> Enter IP Manually
+            </button>
+        </div>
+
+        <!-- Manual IP Entry Screen -->
+        <div id="manual-screen" class="screen">
+            <button class="btn btn-back btn-secondary" onclick="showScreen('scanner-screen')">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Manual Connection</h1>
+            <h2>Enter Robot IP Address</h2>
+            <input id="ip" type="text" placeholder="192.168.1.100"
+                style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #e9ecef; margin: 20px 0; font-size: 16px;">
+            <button class="btn" onclick="processIpAndContinue()">
+                <i class="fas fa-plug"></i> Connect
+            </button>
+        </div>
+
+        <!-- Mode Selection Screen -->
+        <div id="mode-screen" class="screen">
+            <h1>Select Mode</h1>
+            <h2>Choose how to use your robot</h2>
+            <div class="mode-selection">
+                <div class="mode-card" onclick="selectMode('remote')">
+                    <div class="mode-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="mode-info">
+                        <h3>Remote Control</h3>
+                        <p>Manually control robot movements</p>
+                    </div>
+                </div>
+                <div class="mode-card" onclick="selectMode('deskmate')">
+                    <div class="mode-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <div class="mode-info">
+                        <h3>Desk Mate</h3>
+                        <p>Interactive desktop assistant</p>
+                    </div>
+                </div>
+                <div class="mode-card" onclick="selectMode('path')">
+                    <div class="mode-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="mode-info">
+                        <h3>Path Mode</h3>
+                        <p>Program automated movement sequences</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remote Control Screen -->
+        <div id="remote-screen" class="screen">
+            <button class="btn btn-back btn-secondary" onclick="showScreen('mode-screen')">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Remote Control</h1>
+            <div id="status-indicator" class="status-indicator">
+                <i class="fas fa-circle"></i> Disconnected
+            </div>
+            <div class="control-pad">
+                <button id="forward" class="control-btn"><i class="fas fa-chevron-up"></i></button>
+                <button id="backward" class="control-btn"><i class="fas fa-chevron-down"></i></button>
+                <button id="left" class="control-btn"><i class="fas fa-chevron-left"></i></button>
+                <button id="right" class="control-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Desk Mate Screen -->
+        <div id="deskmate-screen" class="screen">
+            <button class="btn btn-back btn-secondary" onclick="showScreen('mode-screen')">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Desk Mate Mode</h1>
+            
+            
+            <div class="desk-mate-container">
+                <div class="desk-mate-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+            
+                <div id="desk-normal-mode" class="mode-card" onclick="selectDeskMode('normal')">
+                    <div class="mode-icon">
+                        <i class="fas fa-shoe-prints"></i>
+                    </div>
+                    <div class="mode-info">
+                        <h3>Normal Desk Mode</h3>
+                        <p>random movement on desk</p>
+                    </div>
+                </div>
+
+                <div id="desk-calm-mode" class="mode-card" onclick="selectDeskMode('calm')">
+                    <div class="mode-icon">
+                        <i class="fas fa-couch"></i>
+                    </div>
+                    <div class="mode-info">
+                        <h3>Calm Desk Mode&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</h3>
+                        <p>stay calm while balancing</p>
+                    </div>
+                </div>
+
+                <div class="desk-mate-message">
+                    You are now in Desk Mate mode. Your robot is ready to assist you at your desk.
+                </div>
+            </div>
+        </div>
+
+        <!-- Path Mode Screen -->
+        <div id="path-screen" class="screen">
+            <button class="btn btn-back btn-secondary" onclick="showScreen('mode-screen')">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1>Path Mode</h1>
+            <h2>Program Movement Sequence</h2>
+            
+            <div class="command-builder">
+                <h3 style="margin-bottom: 15px; color: var(--primary);">Add Command</h3>
+                <div class="command-row">
+                    <select id="command-type" class="command-select">
+                        <option value="move_forward">Move Forward</option>
+                        <option value="move_backward">Move Backward</option>
+                        <option value="rotate_right">Rotate Right</option>
+                        <option value="rotate_left">Rotate Left</option>
+                    </select>
+                    <input id="command-value" type="number" class="command-input" placeholder="Value" min="1" step="1">
+                    <span id="value-unit" style="font-size: 14px; color: var(--gray);">seconds</span>
+                </div>
+                <button class="btn btn-small" onclick="addCommand()">
+                    <i class="fas fa-plus"></i> Add Command
+                </button>
+            </div>
+
+            <div class="command-list" id="command-list">
+                <div style="text-align: center; color: var(--gray); font-style: italic;">
+                    No commands added yet
+                </div>
+            </div>
+
+            <div class="loop-controls">
+                <span style="font-weight: 500;">Loop Count:</span>
+                <input id="loop-count" type="number" class="loop-input" value="1" min="1">
+                <button id="infinity-btn" class="infinity-btn" onclick="toggleInfinity()">
+                    <i class="fas fa-infinity"></i> Infinity
+                </button>
+            </div>
+
+            <div class="execute-section">
+                <button class="btn btn-execute" onclick="executePathSequence()">
+                    <i class="fas fa-play"></i> Execute Path
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="clearCommands()">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="jsQR.js"></script>
+    <script src="app.js"></script>
+</body>
+
+
+</html>
