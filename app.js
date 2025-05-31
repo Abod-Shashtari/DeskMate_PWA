@@ -175,6 +175,10 @@ function updateCommandList() {
     listElement.innerHTML = html;
 }
 
+function sendStopInfinity(){
+    send("stop-infinity");
+}
+
 function toggleInfinity() {
     const btn = document.getElementById('infinity-btn');
     const loopInput = document.getElementById('loop-count');
